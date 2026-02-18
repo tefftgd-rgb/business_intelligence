@@ -1,0 +1,52 @@
+---
+title: "Class2RIntro"
+author: "Grant Tefft"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+          toc: TRUE
+          toc_float: TRUE 
+          number_sections: TRUE 
+          code_folding: show 
+          code_download: TRUE 
+          theme: simplex 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Assignment 
+
+R has three assignment operators: 
+
+- `->`,
+- `=`, and  
+- `<-`
+
+```{r assignments}
+x1 = 5
+5 -> x2
+x3 = 7
+
+
+cat("The valiue of x1:", x1)
+
+```
+
+## Atomic Vectors 
+
+Atomic vectors are 1D data dtructures, where all values in them have to have the same data type. For example, if we do the following: 
+
+```{r atomic}
+mixed_vec = c('ISA', 401)
+
+mixed_num = c(401L,23)
+
+print(typeof(mixed_num))
+print(typeof(mixed_vec))
+```
+From this output, if you have multiple data types, R will use the most recent representation of them. 
+
+
+

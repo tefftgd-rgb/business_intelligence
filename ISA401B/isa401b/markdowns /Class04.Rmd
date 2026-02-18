@@ -1,0 +1,87 @@
+---
+title: "Class04"
+author: "Grant Tefft"
+output: 
+  html_document:
+    toc: TRUE 
+    toc_float: true 
+    
+  
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Getting data from the USAJOBS API 
+
+
+```{r our request}
+# var request = require('request');    
+#             
+# var host = 'data.usajobs.gov';  
+# var userAgent = 'your@email.address';  
+# var authKey = 'YourAPIKey';    
+#             
+# request({      
+#     url: 'https://data.usajobs.gov/api/search?JobCategoryCode=2210&Keyword=Software Development&LocationName=Washington, DC',      
+#     method: 'GET',      
+#     headers: {          
+#         "Host": host,          
+#         "User-Agent": userAgent,          
+#         "Authorization-Key": authKey      
+#     }  
+# }, function(error, response, body) {      
+#     var data = JSON.parse(body);  
+# });
+
+host = 'data.usajobs.gov';  
+user_agent = "tefftgd@miamioh.edu"
+auth_key = ("1fAz/4tzfwy8gY3JFjq4SgZByQ008EBetykeZDhj+IU=")
+
+my_req = httr2::request("https://data.usajobs.gov/api/search") |>
+  httr2::req_headers( 
+    #LHS is the name of the header input per the API doc. This is case sensitive
+    #RHS is the name of the objext in R which we defined in lines 39-41
+    #Added back ticks for header inputs that are the names from API but R does not like      it 
+     Host = host, 
+     `User-Agent`= user_agent,
+     `Authorization-Key`= auth_key 
+  ) |>
+  httr2:: req_url_query(
+    #JobCategoryCode=2210&Keyword=Software Development
+    JobCategoryCode = 2210,
+    Keyword = "Data Analyst", 
+    ResultsPerPage=500
+  )
+response = httr2::req_perform(my_req)
+
+usa_jobs_data = response |>
+  httr2::resp_body_string()|>
+  jsonlite::fromJSON (flatten = T)
+  
+dplyr::glimpse(usa_jobs_data)
+
+usajobsdf= usa_jobs_data$SearchResult$SearchResultItems
+
+usa_jobs_data$SearchResult$SearchResultCountAll
+
+usajobsdf |>
+  tidyr::unnest(
+    cols = c(
+      "MatchedObjectDescriptor.PositionLocation",
+      "MatchedObjectDescriptor.JobCategory",
+      "MatchedObjectDescriptor.PositionSchedule"
+      
+    ), 
+    names_sep = '.'
+  ) ->
+  usajobs_df_clean
+  
+
+
+```
+            
+
+
+
+
+

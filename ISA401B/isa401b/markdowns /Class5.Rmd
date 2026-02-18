@@ -1,0 +1,33 @@
+---
+title: "Class6"
+author: "Grant Tefft"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: TRUE 
+    toc_float: TRUE 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r bls}
+robotstxt::paths_allowed(
+  paths = "/ooh/", domain = "www.bls.gov", bot  ="*"
+)
+```
+
+```{r indeed, warning=FALSE}
+robotstxt::paths_allowed(
+  paths = "/jobs/", domain = "www.indeed.com", bot = "*"
+)
+```
+Given that this returned TRUE it means we are allowed to scrape this webpage.
+
+```{r linkedin}
+robotstxt::paths_allowed(
+  paths = "/jobs/", domain = "https://www.linkedin.com", bot = "*"
+)
+```
+
