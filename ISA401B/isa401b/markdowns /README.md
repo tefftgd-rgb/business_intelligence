@@ -19,4 +19,6 @@ This repository contains my coursework for ISA 401 at Miami University.\
 - Data Acquisition & Transformation\
 - Data Visualization & Communication\
 - Exploratory Data Mining\
-}
+Repo contains coursework for business intelligence course. 
+
+} 
