@@ -1,0 +1,113 @@
+---
+title: "Scraping for one or more webpage"
+author: "Grant Tefft"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: TRUE 
+    toc_float: TRUE 
+    number_sections: TRUE 
+    code_download: TRUE 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# demo: scraping MUISA Courses and Description 
+
+In this demo, I am scraping the course title and course description from [MU's ISA Course Bulletein](https://bulletin.miamioh.edu/courses-instruction/isa/).
+
+```{r scrape_isa }
+#step0: can I scrape this based on the robots.txt
+robotstxt::paths_allowed(paths="https://bulletin.miamioh.edu/courses-instruction/isa/")
+
+#step1: get the raw html of page into r (save this step so we do not overload the server)
+
+mu_webpage = rvest:: read_html("https://bulletin.miamioh.edu/courses-instruction/isa/")
+
+#steps2 and 3: we will do this separately for each of the titles and descriptions
+
+mu_webpage |> 
+  rvest:: html_elements("div.courseblock > p.courseblocktitle > strong") |> 
+  rvest:: html_text2 () -> course_titles_a
+
+#alternatively, let us work our way through what the inspect gives us 
+#if you wanted to work your way through this, you will have to drop the nth child 
+#(to get all the course blocks rather than just the 23rd course block)
+mu_webpage |> 
+  rvest:: html_elements("#sc_sccoursedescs > div > p.courseblocktitle > strong") |> 
+  rvest:: html_text2 () -> course_titles_b
+#from the selctor gadget it seems that we have two options: 
+mu_webpage |> 
+  rvest:: html_elements(" strong") |> 
+  rvest:: html_text2 () -> course_titles_c
+
+# it also implies that I can potentially get this using p strong 
+mu_webpage |> 
+  rvest:: html_elements(" p strong") |> 
+  rvest:: html_text2 () -> course_titles_d
+
+
+# Get the course descriptions 
+
+mu_webpage |> 
+  rvest:: html_elements(".courseblockdesc") |> 
+  rvest :: html_text2() -> course_desc
+
+#create the data frame 
+df= data.frame(title = course_titles_a, desc = course_desc)
+```
+
+## Creating our own function to scrape FSB pages 
+```{r my_function}
+# original URL https://bulletin.miamioh.edu/courses-instruction/isa/
+# my expectation is the only thing that needs to change is isa 
+#in one of three ways: 1. Create different URLs from scratch. 2. URL remian fixed 
+
+# based on class we will do 2
+scrape_fsb = function(suffix = 'isa'){
+  bulletin_url = paste0(
+    "https://bulletin.miamioh.edu/courses-instruction", "/", suffix, "/"
+  )
+  mu_webpage = rvest:: read_html(bulletin_url)
+  
+  mu_webpage |> 
+  rvest:: html_elements("div.courseblock > p.courseblocktitle > strong") |> 
+  rvest:: html_text2 () -> course_titles_a
+  
+  mu_webpage |> 
+  rvest:: html_elements(".courseblockdesc") |> 
+  rvest :: html_text2() -> course_desc
+  
+  df= data.frame(title = course_titles_a, desc = course_desc)
+  
+  Sys.sleep(2)
+  return(df)
+}
+
+
+
+```
+
+
+```{r mkt_df}
+mkt_df = scrape_fsb(suffix = "mkt")
+```
+
+# Use our custom function for all FSB courses 
+
+```{r scrape_fsb_courses}
+fsb_vec = c('isa', ' mkt', 'fin', 'eco', 'mgt', 'acc', 'esp', 'bus')
+
+fsb_df = data.frame() # container to store all courses
+
+for (name in fsb_vec) {
+  df = scrape_fsb(suffix=name)
+  
+  fsb_df = rbind(fsb_df, df)
+  
+}
+```
+
+
